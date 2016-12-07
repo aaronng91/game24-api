@@ -1,0 +1,5 @@
+---
+applications:
+- name: game24-api
+  disk_quota: 256M
+  memory: 256M
