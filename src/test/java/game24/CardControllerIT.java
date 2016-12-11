@@ -18,13 +18,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class CardControllerIntegrationTest {
+public class CardControllerIT {
 
 	@Autowired
 	private MockMvc mvc;
 
 	@Test
-	public void getArrayOf4CardsFromCardsEndpoint() throws Exception {
+	public void shouldGetSameArrayOf4Cards() throws Exception {
         MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/cards"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(4)))

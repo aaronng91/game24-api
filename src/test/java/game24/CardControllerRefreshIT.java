@@ -1,5 +1,7 @@
 package game24;
 
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +13,7 @@ import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -21,18 +24,18 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class CardControllerWebsocketTest {
+public class CardControllerRefreshIT {
 
     @LocalServerPort
     private int port;
@@ -43,13 +46,18 @@ public class CardControllerWebsocketTest {
 
     private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
+    private int[] initialResponse;
+
     @Autowired
     private MockMvc mvc;
 
     @Before
     public void setup() throws Exception {
         // Client must reach /cards via HTTP GET first to initialise cards
-        mvc.perform(MockMvcRequestBuilders.get("/cards")).andReturn();
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/cards")).andReturn();
+        String resultString = result.getResponse().getContentAsString();
+        initialResponse = Arrays.stream(resultString.substring(1, resultString.length()-1).split(","))
+                .map(String::trim).mapToInt(Integer::parseInt).toArray();
 
         List<Transport> transports = new ArrayList<>();
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
@@ -60,7 +68,7 @@ public class CardControllerWebsocketTest {
     }
 
     @Test
-    public void getRefreshedCards() throws Exception {
+    public void shouldGetDifferentSetOfCards() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Throwable> failure = new AtomicReference<>();
 
@@ -78,6 +86,7 @@ public class CardControllerWebsocketTest {
                     public void handleFrame(StompHeaders headers, Object payload) {
                         try {
                             assertEquals(((int[])payload).length, 4);
+                            assertThat(payload, IsNot.not(IsEqual.equalTo(initialResponse)));
                         } catch (Throwable t) {
                             failure.set(t);
                         } finally {
