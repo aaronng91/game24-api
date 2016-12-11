@@ -16,7 +16,6 @@ public class CardController {
     private int[] cards;
 
     @RequestMapping("/cards")
-    @CrossOrigin()
     public ResponseEntity<int[]> getCards() {
         if (cards == null) {
             cards = new int[4];
