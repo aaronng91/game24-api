@@ -1,10 +1,8 @@
 package game24;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -13,27 +11,29 @@ public class CardController {
     private static final int MAX = 13;
     private static final int MIN = 1;
 
-    private int[] cards;
+    private int[] cards = initialiseCards();
 
-    @RequestMapping("/cards")
-    public ResponseEntity<int[]> getCards() {
-        if (cards == null) {
-            cards = new int[4];
-            generateRandomCards();
-        }
-        return ResponseEntity.ok().body(cards);
+    @SubscribeMapping("/topic/cards")
+    public int[] getCards() {
+        return cards;
     }
 
     @MessageMapping("/refresh")
     @SendTo("/topic/cards")
-    public int[] cards() {
-        generateRandomCards();
+    public int[] refreshCards() {
+        cards = generateRandomCards(cards);
         return cards;
     }
 
-    private void generateRandomCards() {
+    private int[] initialiseCards() {
+        int[] initialCards = new int[4];
+        return generateRandomCards(initialCards);
+    }
+
+    private int[] generateRandomCards(int[] cards) {
         for (int i = 0; i < 4; i ++) {
             cards[i] = (int) Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
         }
+        return cards;
     }
 }
