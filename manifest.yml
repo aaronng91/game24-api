@@ -3,3 +3,4 @@ applications:
 - name: game24-api
   disk_quota: 256M
   memory: 256M
+  path: target/game24-api-0.1.0.jar
