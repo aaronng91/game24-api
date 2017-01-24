@@ -1,4 +1,4 @@
-package game24;
+package game24.card;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;

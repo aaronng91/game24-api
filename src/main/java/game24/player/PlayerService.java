@@ -20,7 +20,7 @@ public class PlayerService {
         playerList.set(playerList.indexOf(sessionId), null);
     }
 
-    public int getPlayerId(String sessionId) {
+    int getPlayerId(String sessionId) {
         return playerList.indexOf(sessionId) + 1;
     }
 }
