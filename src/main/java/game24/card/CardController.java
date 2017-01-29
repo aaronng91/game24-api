@@ -1,5 +1,7 @@
 package game24.card;
 
+import game24.tap.TapService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
@@ -13,6 +15,9 @@ public class CardController {
 
     private int[] cards = initialiseCards();
 
+    @Autowired
+    private TapService tapService;
+
     @SubscribeMapping("/topic/cards")
     public int[] getCards() {
         return cards;
@@ -21,6 +26,7 @@ public class CardController {
     @MessageMapping("/refresh")
     @SendTo("/topic/cards")
     public int[] refreshCards() {
+        tapService.restartGame();
         cards = generateRandomCards(cards);
         return cards;
     }

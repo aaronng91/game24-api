@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotEquals;
 public class CardControllerIntegrationTest extends WebsocketTest {
 
     private static final String WEBSOCKET_TOPIC = "/topic/cards";
+    private static final String REFRESH_PATH = "/refresh";
 
     private StompSession session;
 
@@ -37,7 +38,7 @@ public class CardControllerIntegrationTest extends WebsocketTest {
     public void shouldReceiveNewSetOfCardsUponSubscription() throws Exception {
         String initialPayload = blockingQueue.poll(1, SECONDS);
 
-        session.send("/refresh", null);
+        session.send(REFRESH_PATH, null);
 
         String newPayload = blockingQueue.poll(1, SECONDS);
 
